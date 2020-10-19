@@ -26,7 +26,7 @@ chmod a+rx /usr/local/sbin/getinsights
 Here's a list of example use-cases.
 
 ## Using the tool for monitoring purposes.
-Consider using https://github.com/mglantz/get_insight instead. This tool was designed for that specific purpose.
+Consider using https://github.com/mglantz/check_insights instead. This tool was designed for that specific purpose.
 
 ## Check all Red Hat Insights issues for your system.
 
