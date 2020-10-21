@@ -41,7 +41,7 @@ parser.add_argument(
     '--perf', action='store_true',
     help='Prints all found Performance issues')
 parser.add_argument(
-    '--output', default="text", choices=['text', 'json'],
+    '-o', '--output', default="text", choices=['text', 'json'],
     help='Do you want output as text or json?')
 args = parser.parse_args()
 
@@ -110,7 +110,9 @@ for item in datastore:
         stability_issues += 1
     if item['rule']['category']['name'] == "Availability":
         availability_issues += 1
-    if args.all:
+    if args.sum:
+        pass
+    elif args.all:
         print('Rule_id:     ', item['rule']['rule_id'], sep="")
         print('Rule type:   ', item['rule']['category']['name'], sep="")
         print('Summary:     ', item['rule']['summary'], sep="")
@@ -121,6 +123,7 @@ for item in datastore:
         print('Needs reboot: ', item['rule']['reboot_required'], sep="")
         print('Publish date: ', item['rule']['publish_date'], sep="")
         print('--------------')
+        pass
     elif args.sec and item['rule']['category']['name'] == "Security":
         print('Rule_id:     ', item['rule']['rule_id'], sep="")
         print('Rule type:   ', item['rule']['category']['name'], sep="")
@@ -165,7 +168,18 @@ for item in datastore:
         print('Needs reboot: ', item['rule']['reboot_required'], sep="")
         print('Publish date: ', item['rule']['publish_date'], sep="")
         print('--------------')
-    elif args.sum:
-        pass
 
-print('Red Hat Insights found: Total issues: ',total_issues,'. Security issues: ', security_issues,'. Availability issues: ', availability_issues, '. Stability issues: ', stability_issues, '. Performance issues: ', performance_issues, sep="")
+if args.output == 'json':
+    print('{ \'total\': ', total_issues,
+          ', \'security\': ', security_issues,
+          ', \'availability\': ', availability_issues,
+          ', \'stability\': ', stability_issues,
+          ', \'performance\': ', performance_issues,
+          ' }', sep="")
+else:
+    print('Red Hat Insights found: Total issues: ', total_issues,
+          '.Security issues: ', security_issues,
+          '. Availability issues: ', availability_issues,
+          '. Stability issues: ', stability_issues,
+          '. Performance issues: ', performance_issues,
+          sep="")
