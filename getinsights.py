@@ -96,8 +96,20 @@ with open('/tmp/insights-result') as f:
 
 # Count how many hit we have in total
 total_issues = 0
+security_issues = 0
+performance_issues = 0
+stability_issues = 0
+availability_issues = 0
 for item in datastore:
     total_issues += 1
+    if item['rule']['category']['name'] == "Security":
+        security_issues += 1
+    if item['rule']['category']['name'] == "Performance":
+        performance_issues += 1
+    if item['rule']['category']['name'] == "Stability":
+        stability_issues += 1
+    if item['rule']['category']['name'] == "Availability":
+        availability_issues += 1
     if args.all:
         print('Rule_id:     ', item['rule']['rule_id'], sep="")
         print('Rule type:   ', item['rule']['category']['name'], sep="")
@@ -155,30 +167,5 @@ for item in datastore:
         print('--------------')
     elif args.sum:
         pass
-
-
-# Count how many of those are security issues
-security_issues = 0
-for item in datastore:
-   if item['rule']['category']['name'] == "Security":
-      security_issues += 1
-
-# Count how many of those are performance issues
-performance_issues = 0
-for item in datastore:
-    if item['rule']['category']['name'] == "Performance":
-        performance_issues += 1
-
-# Count how many of those are stability issues
-stability_issues = 0
-for item in datastore:
-    if item['rule']['category']['name'] == "Stability":
-        stability_issues += 1
-
-# Count how many of those are availability issues
-availability_issues = 0
-for item in datastore:
-    if item['rule']['category']['name'] == "Availability":
-        availability_issues += 1
 
 print('Red Hat Insights found: Total issues: ',total_issues,'. Security issues: ', security_issues,'. Availability issues: ', availability_issues, '. Stability issues: ', stability_issues, '. Performance issues: ', performance_issues, sep="")
