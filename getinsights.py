@@ -2,13 +2,15 @@
 # Name: getinsights.py
 #
 # Description: Print out information about issues detected by Red Hat Insight.
-# Prereq: latest version of Red Hat Insight installed on the system and system registered to Satelite or cloud.redhat.com.
+# Prereq: latest version of Red Hat Insight installed on the system and system
+# registered to Satelite or cloud.redhat.com.
 #
 # Author: Magnus Glantz, sudo@redhat.com, 2020
 
 # Import required modules
-import sys 
+import sys
 import os
+import argparse
 import subprocess
 try:
     import simplejson as json
@@ -19,40 +21,29 @@ import rpm
 # We need to discard some info to /dev/null later on
 DEVNULL = open(os.devnull, 'wb')
 
-allset = "false"
-summary = "false"
-sec = "false"
-avail = "false"
-stab = "false"
-perf = "false"
-
-# Argument parsing and --help
-for argument in sys.argv:
-    if "--help" in argument:
-        print('Usage: getsinsights | getinsights [options]')
-        print('Options')
-        print('--all    Prints all found issues. This is also what you get with no arguments passed.')
-        print('--sum    Only prints a summary of what was found.')
-        print('--sec    Prints all found Security issues.')
-        print('--avail  Prints all found Availability issues')
-        print('--stab   Prints all found Stability issues')
-        print('--perf   Prints all found Performance issues')
-        sys.exit(0)
-    elif "--sec" in argument:
-        sec = "true"
-    elif "--avail" in argument:
-       avail = "true"
-    elif "-stab" in argument:
-        stab = "true"
-    elif "--perf" in argument:
-        perf = "true"
-    elif "--sum" in argument:
-        summary = "true" 
-    else:
-        allset = "true"
-
-if sec == "true" or avail == "true" or stab == "true" or perf == "true" or summary == "true":
-    allset = "false"
+parser = argparse.ArgumentParser(description='Get summary of system software status')
+parser.add_argument(
+    '--all', action='store_true',
+    help='Prints all found issues.')
+parser.add_argument(
+    '--sum', action='store_true',
+    help='Only prints a summary of what was found.')
+parser.add_argument(
+    '--sec', action='store_true',
+    help='Prints all found Security issues.')
+parser.add_argument(
+    '--avail', action='store_true',
+    help='Prints all found Availability issues')
+parser.add_argument(
+    '--stab', action='store_true',
+    help='Prints all found Stability issues')
+parser.add_argument(
+    '--perf', action='store_true',
+    help='Prints all found Performance issues')
+parser.add_argument(
+    '--output', default="text", choices=['text', 'json'],
+    help='Do you want output as text or json?')
+args = parser.parse_args()
 
 # Check for the insights-client package, if it's not installed, nothing below will work.
 ts = rpm.TransactionSet()
@@ -107,7 +98,7 @@ with open('/tmp/insights-result') as f:
 total_issues = 0
 for item in datastore:
     total_issues += 1
-    if allset == "true":
+    if args.all:
         print('Rule_id:     ', item['rule']['rule_id'], sep="")
         print('Rule type:   ', item['rule']['category']['name'], sep="")
         print('Summary:     ', item['rule']['summary'], sep="")
@@ -118,55 +109,51 @@ for item in datastore:
         print('Needs reboot: ', item['rule']['reboot_required'], sep="")
         print('Publish date: ', item['rule']['publish_date'], sep="")
         print('--------------')
-    elif sec == "true":
-        if item['rule']['category']['name'] == "Security":
-            print('Rule_id:     ', item['rule']['rule_id'], sep="")
-            print('Rule type:   ', item['rule']['category']['name'], sep="")
-            print('Summary:     ', item['rule']['summary'], sep="")
-            print('Description: ', item['rule']['generic'], sep="")
-            print('Impact:      ', item['rule']['impact']['name'], sep="")
-            print('Likelihood:  ', item['rule']['likelihood'], sep="")
-            print('Total risk:  ', item['rule']['total_risk'], sep="")
-            print('Needs reboot: ', item['rule']['reboot_required'], sep="")
-            print('Publish date: ', item['rule']['publish_date'], sep="")
-            print('--------------')
-    elif perf == "true":
-        if item['rule']['category']['name'] == "Performance":
-            print('Rule_id:     ', item['rule']['rule_id'], sep="")
-            print('Rule type:   ', item['rule']['category']['name'], sep="")
-            print('Summary:     ', item['rule']['summary'], sep="")
-            print('Description: ', item['rule']['generic'], sep="")
-            print('Impact:      ', item['rule']['impact']['name'], sep="")
-            print('Likelihood:  ', item['rule']['likelihood'], sep="")
-            print('Total risk:  ', item['rule']['total_risk'], sep="")
-            print('Needs reboot: ', item['rule']['reboot_required'], sep="")
-            print('Publish date: ', item['rule']['publish_date'], sep="")
-            print('--------------')
-    elif stab == "true":
-        if item['rule']['category']['name'] == "Stability":
-            print('Rule_id:     ', item['rule']['rule_id'], sep="")
-            print('Rule type:   ', item['rule']['category']['name'], sep="")
-            print('Summary:     ', item['rule']['summary'], sep="")
-            print('Description: ', item['rule']['generic'], sep="")
-            print('Impact:      ', item['rule']['impact']['name'], sep="")
-            print('Likelihood:  ', item['rule']['likelihood'], sep="")
-            print('Total risk:  ', item['rule']['total_risk'], sep="")
-            print('Needs reboot: ', item['rule']['reboot_required'], sep="")
-            print('Publish date: ', item['rule']['publish_date'], sep="")
-            print('--------------')
-    elif avail == "true":
-        if item['rule']['category']['name'] == "Availability":
-            print('Rule_id:     ', item['rule']['rule_id'], sep="")
-            print('Rule type:   ', item['rule']['category']['name'], sep="")
-            print('Summary:     ', item['rule']['summary'], sep="")
-            print('Description: ', item['rule']['generic'], sep="")
-            print('Impact:      ', item['rule']['impact']['name'], sep="")
-            print('Likelihood:  ', item['rule']['likelihood'], sep="")
-            print('Total risk:  ', item['rule']['total_risk'], sep="")
-            print('Needs reboot: ', item['rule']['reboot_required'], sep="")
-            print('Publish date: ', item['rule']['publish_date'], sep="")
-            print('--------------')
-    elif summary == "true":
+    elif args.sec and item['rule']['category']['name'] == "Security":
+        print('Rule_id:     ', item['rule']['rule_id'], sep="")
+        print('Rule type:   ', item['rule']['category']['name'], sep="")
+        print('Summary:     ', item['rule']['summary'], sep="")
+        print('Description: ', item['rule']['generic'], sep="")
+        print('Impact:      ', item['rule']['impact']['name'], sep="")
+        print('Likelihood:  ', item['rule']['likelihood'], sep="")
+        print('Total risk:  ', item['rule']['total_risk'], sep="")
+        print('Needs reboot: ', item['rule']['reboot_required'], sep="")
+        print('Publish date: ', item['rule']['publish_date'], sep="")
+        print('--------------')
+    elif args.perf and item['rule']['category']['name'] == "Performance":
+        print('Rule_id:     ', item['rule']['rule_id'], sep="")
+        print('Rule type:   ', item['rule']['category']['name'], sep="")
+        print('Summary:     ', item['rule']['summary'], sep="")
+        print('Description: ', item['rule']['generic'], sep="")
+        print('Impact:      ', item['rule']['impact']['name'], sep="")
+        print('Likelihood:  ', item['rule']['likelihood'], sep="")
+        print('Total risk:  ', item['rule']['total_risk'], sep="")
+        print('Needs reboot: ', item['rule']['reboot_required'], sep="")
+        print('Publish date: ', item['rule']['publish_date'], sep="")
+        print('--------------')
+    elif args.stab and item['rule']['category']['name'] == "Stability":
+        print('Rule_id:     ', item['rule']['rule_id'], sep="")
+        print('Rule type:   ', item['rule']['category']['name'], sep="")
+        print('Summary:     ', item['rule']['summary'], sep="")
+        print('Description: ', item['rule']['generic'], sep="")
+        print('Impact:      ', item['rule']['impact']['name'], sep="")
+        print('Likelihood:  ', item['rule']['likelihood'], sep="")
+        print('Total risk:  ', item['rule']['total_risk'], sep="")
+        print('Needs reboot: ', item['rule']['reboot_required'], sep="")
+        print('Publish date: ', item['rule']['publish_date'], sep="")
+        print('--------------')
+    elif args.avail and item['rule']['category']['name'] == "Availability":
+        print('Rule_id:     ', item['rule']['rule_id'], sep="")
+        print('Rule type:   ', item['rule']['category']['name'], sep="")
+        print('Summary:     ', item['rule']['summary'], sep="")
+        print('Description: ', item['rule']['generic'], sep="")
+        print('Impact:      ', item['rule']['impact']['name'], sep="")
+        print('Likelihood:  ', item['rule']['likelihood'], sep="")
+        print('Total risk:  ', item['rule']['total_risk'], sep="")
+        print('Needs reboot: ', item['rule']['reboot_required'], sep="")
+        print('Publish date: ', item['rule']['publish_date'], sep="")
+        print('--------------')
+    elif args.sum:
         pass
 
 
