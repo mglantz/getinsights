@@ -6,6 +6,7 @@
 # registered to Satelite or cloud.redhat.com.
 #
 # Author: Magnus Glantz, sudo@redhat.com, 2020
+#         Ilkka Tengvall, ...@redhat.com, 2020
 
 # Import required modules
 import sys
