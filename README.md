@@ -34,6 +34,11 @@ Consider using https://github.com/mglantz/check_insights instead. This tool was 
 getinsights
 ```
 
+## Print output as json
+```
+# getinsights -o json
+```
+
 ## Check all Red Hat Insights security issues for your systems.
 
 ```
