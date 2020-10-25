@@ -71,7 +71,13 @@ if os.path.isfile('/etc/insights-client/.lastupload'):
 try:
     subprocess.run(['insights-client'], check = True, stdout=DEVNULL, stderr=DEVNULL)
 except subprocess.CalledProcessError:
-    print('Unknown: insights-client failed to check in. Run: insights-client --check-result for more information.')
+    print('Unknown: insights-client failed to send report. Run: insights-client for more information.')
+    sys.exit(3)
+
+try:
+    subprocess.run(['insights-client', '--check-result'], check = True, stdout=DEVNULL, stderr=DEVNULL)
+except subprocess.CalledProcessError:
+    print('Unknown: insights-client failed to check result. Run: insights-client --check-result for more information.')
     sys.exit(3)
 
 # Remove stdout file
